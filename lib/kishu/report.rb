@@ -9,19 +9,25 @@ module Kishu
 
     # include Kishu::Event
 
-    API_URL = "https://api.datacite.org"
     FILENAME = "../../tmp/output.json"
 
 
-    def get_events
-      aggs = all({aggs_size: 100, aggs_after:"false"})
-      aggs.map do |event|
-        wrap_event event
+    def get_events options={}
+      aggs = all({aggs_size: options[:aggs_size] || 100, aggs_after:"false"})
+      puts aggs.class
+      x = aggs.map do |event|
+        new_event = wrap_event event
+        next if new_event["data-type"] != "dataset"
+        new_event
       end
-      aggs
+      x
     end
 
-    def get_datasets
+    def get_all_events
+      get_events({aggs_size: 1000})
+
+
+
     end
 
     def make_report
@@ -30,13 +36,23 @@ module Kishu
         "report-header": get_header(logdate),
         "report-datasets": get_events
       }
-      File.open("../../tmp/DataCite-access.log-_#{logdate}.json","w") do |f|
+      File.open("DataCite-access.log-_#{logdate}.json","w") do |f|
         f.write(report.to_json)
       end
     end
 
+    def set_period year_month
+      # PERIOD = { 
+      #   "begin-date": Date.civil(date.year, date.mon, 1).strftime("%Y-%m-%d"),
+      #   "end-date": Date.civil(date.year, date.mon, -1).strftime("%Y-%m-%d"),
+      # }
+      @period = {"begin-date": "2018-04-01","end-date": "2018-04-30",}
+    end
+
     def get_report year_month 
       # logdate= "2018-04-05"
+      set_period year_month
+
       make_report
       # send_report get_header(logdate).dig("report-id"), logdate
     end
