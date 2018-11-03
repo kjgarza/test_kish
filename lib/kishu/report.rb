@@ -13,8 +13,8 @@ module Kishu
 
 
     def get_events options={}
-      @client = Client.new()
-      aggs = @client.get({aggs_size: options[:aggs_size] || 100, after_key:""})
+      es_client = Client.new()
+      aggs = es_client.get({aggs_size: options[:aggs_size] || 100, after_key:""})
       puts aggs.class
       x = aggs.map do |event|
         new_event = wrap_event event
