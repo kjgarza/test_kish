@@ -44,9 +44,9 @@ module Kishu
     
     def wrap_event(event)
       puts "dmdmdmdmdmmdmdmdmdmd \n"
-      puts event
+      # puts event
       totale = event.dig("totale").fetch("buckets", nil)
-      puts event.dig("unique").fetch("buckets", nil)
+      # puts event.dig("unique").fetch("buckets", nil)
       unique = event.dig("unique").fetch("buckets", nil)
       # puts unique[1].dig('key')
     
