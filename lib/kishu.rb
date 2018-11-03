@@ -3,7 +3,8 @@ require "kishu/report"
 require "kishu/cli"
 require "kishu/sushi"
 require "kishu/version"
-require "kishu/collection"
+require "kishu/cursor"
+require "kishu/client"
 
 
 

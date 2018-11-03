@@ -13,7 +13,8 @@ module Kishu
 
 
     def get_events options={}
-      aggs = all({aggs_size: options[:aggs_size] || 100, aggs_after:"false"})
+      @client = Client.new()
+      aggs = @client.get({aggs_size: options[:aggs_size] || 100, after_key:""})
       puts aggs.class
       x = aggs.map do |event|
         new_event = wrap_event event
@@ -24,10 +25,13 @@ module Kishu
     end
 
     def get_all_events
-      get_events({aggs_size: 1000})
-
-
-
+      aggs= get_paginated
+      x = aggs.map do |event|
+        new_event = wrap_event event
+        next if new_event["data-type"] != "dataset"
+        new_event
+      end
+      x
     end
 
     def make_report
