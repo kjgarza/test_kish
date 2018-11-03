@@ -8,7 +8,7 @@ module Kishu
 
     def initialize options={}
       @collection = []
-      @before = options.fetch(:after_key,nil)
+      # @before = options.fetch(:after_key,nil)
     end
 
     def each(start = 0)
@@ -40,11 +40,15 @@ module Kishu
     # alias next next_cursor
 
     # # @return [Boolean]
-    # def last?
-    #   return false if next_cursor.is_a?(String)
-    #   return true if next_cursor.nil?
-    #   next_cursor.zero?
-    # end
+    def last?
+      start = [@collection.size, start].max
+      fetch_next_page
+      
+      each(start, &Proc.new)
+      # return false if next_cursor.is_a?(String)
+      # return true if next_cursor.nil?
+      # next_cursor.zero?
+    end
 
     # # @return [Boolean]
     # def reached_limit?

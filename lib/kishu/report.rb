@@ -14,7 +14,7 @@ module Kishu
 
     def get_events options={}
       es_client = Client.new()
-      aggs = es_client.get({aggs_size: options[:aggs_size] || 100, after_key:""})
+      aggs = es_client.get({aggs_size: options[:aggs_size] || 500, after_key:""})
       # puts aggs.class
       x = aggs.map do |event|
         wrap_event event
@@ -23,15 +23,21 @@ module Kishu
       x
     end
 
+    def get_paginated
+      Cursor.new
+    end
+
     def get_all_events
       aggs= get_paginated
-      x = aggs.map do |event|
-        new_event = wrap_event event
-        puts new_event
-        next if new_event.dig("data-type") != "dataset"
-        new_event
-      end
-      x
+
+      puts aggs.each.lazy
+
+
+      # x = aggs.map do |event|
+      #   wrap_event event
+      # end
+      # x = x.reject { |e| e["data-type"] != "dataset" } # returns [1, 3]
+      # x
     end
 
     def make_report

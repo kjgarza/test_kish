@@ -17,7 +17,7 @@ module Kishu
 
    desc "get sushi", "get resolution report"
   #  method_option :username, :default => ENV['MDS_USERNAME']
-  #  method_option :password, :default => ENV['MDS_PASSWORD']
+   method_option :aggs_size, :type => :numeric, :default => 1000
    method_option :month_year, :type => :string, :default => "2018-04"
 
    def get
