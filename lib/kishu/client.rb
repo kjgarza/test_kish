@@ -5,7 +5,7 @@ require_relative 'utils'
 require_relative 'base'
 
 module Kishu
-  module Client 
+  class Client 
 
     def initialize
       @client = Elasticsearch::Client.new host: 'localhost:9200', transport_options: { request: { timeout: 3600, open_timeout: 3600 } }
