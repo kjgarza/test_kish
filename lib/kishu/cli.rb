@@ -5,7 +5,7 @@ require_relative 'sushi'
 
 
 module Kishu
-  class CLI < thor
+  class CLI < Thor
     include Kishu::Base
     include Kishu::Utils
     include Kishu::Report
