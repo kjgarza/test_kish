@@ -22,8 +22,8 @@ module Kishu
         },
         index: "resolutions"
         )
-      puts x
-      x.dig("aggregations")
+      puts x.class
+      x.dig("aggregations","doi","buckets")
     end
     
     def aggregations options={}
@@ -33,7 +33,7 @@ module Kishu
           size: options[:aggs_size] || 102
           },
           aggs: {
-            unqiue: {terms: {field: "unique_usage"}},
+            unique: {terms: {field: "unique_usage"}},
             totale: {terms: {field: "total_usage"	}}
           }
         }
@@ -41,35 +41,56 @@ module Kishu
     end
     
     
+    
     def wrap_event(event)
-      total = event.get("[dois][buckets]")
+      puts "dmdmdmdmdmmdmdmdmdmd \n"
+      puts event
+      totale = event.dig("totale").fetch("buckets", nil)
+      puts event.dig("unique").fetch("buckets", nil)
+      unique = event.dig("unique").fetch("buckets", nil)
+      # puts unique[1].dig('key')
     
-      dois = total.map do |dataset| 
+      unique_regular = unique.find {|access_method| access_method.dig('key').match('regular') }
+      unique_machine = unique.find {|access_method| access_method.dig('key').match('machine') }
+      total_regular  = totale.find {|access_method| access_method.dig('key').match('regular') }
+      total_machine  = totale.find {|access_method| access_method.dig('key').match('machine') }
+
+      dataset = { 
+        doi: event.dig("key","doi"), 
+        unique_counts_regular: unique_regular.nil? ? 0 : unique_regular.dig("doc_count"),
+        unique_counts_machine: unique_machine.nil? ? 0 : unique_machine.dig("doc_count"),
+        total_counts_regular: total_regular.nil? ? 0 : total_regular.dig("doc_count"),
+        total_counts_machine: total_machine.nil? ? 0:  total_machine.dig("doc_count")
+      }
+
+
+
+      # dois = totale.map do |dataset| 
     
-        unique_regular = dataset["access_method"]["buckets"].find {|access_method| access_method['key'] == 'regular' }
-        unique_machine = dataset["access_method"]["buckets"].find {|access_method| access_method['key'] == 'machine' }
-        total_regular  = dataset["total"]["buckets"].find {|access_method| access_method['key'] == 'regular' }
-        total_machine  = dataset["total"]["buckets"].find {|access_method| access_method['key'] == 'machine' }
+      #   unique_regular = dataset["access_method"]["buckets"].find {|access_method| access_method['key'] == 'regular' }
+      #   unique_machine = dataset["access_method"]["buckets"].find {|access_method| access_method['key'] == 'machine' }
+      #   total_regular  = unique.find {|access_method| access_method['key'] =~ 'regular' }
+      #   total_machine  = dataset["total"]["buckets"].find {|access_method| access_method['key'] == 'machine' }
     
-        puts dataset["key"]
-        { 
-          doi: dataset["key"], 
-          unique_counts_regular: unique_regular.nil? ? 0 : unique_regular["unqiue"]["value"],
-          unique_counts_machine: unique_machine.nil? ? 0 : unique_machine["unqiue"]["value"],
-          total_counts_regular: total_regular.nil? ? 0 : total_regular["doc_count"],
-          total_counts_machine: total_machine.nil? ? 0:  total_machine["doc_count"]
-        }
-      end
+      #   puts dataset["key"]
+      #   { 
+      #     doi: dataset["key"], 
+      #     unique_counts_regular: unique_regular.nil? ? 0 : unique_regular["unqiue"]["value"],
+      #     unique_counts_machine: unique_machine.nil? ? 0 : unique_machine["unqiue"]["value"],
+      #     total_counts_regular: total_regular.nil? ? 0 : total_regular["doc_count"],
+      #     total_counts_machine: total_machine.nil? ? 0:  total_machine["doc_count"]
+      #   }
+      # end
     
       conn = Faraday.new(:url => API_URL)
       logger = Logger.new(STDOUT)
-      logger.info total.size
+      logger.info totale.size
       
-      arr = dois.map do |dataset| 
+      # arr = dois.map do |dataset| 
         logger.info dataset
         doi = dataset[:doi]
         json = conn.get "/works/#{doi}"
-        next unless json.success?
+        # next unless json.success?
         logger.info "Success on getting metadata for #{doi}"
         data = JSON.parse(json.body)
     
@@ -99,9 +120,9 @@ module Kishu
         instances.delete_if {|instance| instance.dig(:count) <= 0}
     
         attributes = data.dig("data","attributes")
-        { 
-          "dataset-id": [{type: "doi", value: attributes["doi"]}],
-          "data-type": attributes["resource-type-id"],
+        instanced = { 
+          "dataset-id" => [{type: "doi", value: attributes["doi"]}],
+          "data-type" => attributes["resource-type-id"],
           yop: attributes["published"],
           uri: attributes["identifier"],
           publisher: attributes["container-title"],
@@ -115,23 +136,19 @@ module Kishu
             value: attributes["published"]
           }],
           "dataset-contributors": attributes["author"].map { |a| get_authors(a) },
-          tags:["_dc_meta"],
           platform: "datacite",
           performance: [{
-            period: {
-              "begin-date": "",
-              "end-date": "",
-            },
+            period: @period,
             instance: instances
           }]
         }
-      end
+      # end
     
       # arr.map! do |instance|
       #   LogStash::Event.new(instance)
       # end
     
-      arr
+      instanced
     end
     
     
