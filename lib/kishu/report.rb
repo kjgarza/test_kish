@@ -15,12 +15,11 @@ module Kishu
     def get_events options={}
       es_client = Client.new()
       aggs = es_client.get({aggs_size: options[:aggs_size] || 100, after_key:""})
-      puts aggs.class
+      # puts aggs.class
       x = aggs.map do |event|
-        new_event = wrap_event event
-        next if new_event["data-type"] != "dataset"
-        new_event
+        wrap_event event
       end
+      x = x.reject { |e| e["data-type"] != "dataset" } # returns [1, 3]
       x
     end
 
@@ -28,7 +27,8 @@ module Kishu
       aggs= get_paginated
       x = aggs.map do |event|
         new_event = wrap_event event
-        next if new_event["data-type"] != "dataset"
+        puts new_event
+        next if new_event.dig("data-type") != "dataset"
         new_event
       end
       x
