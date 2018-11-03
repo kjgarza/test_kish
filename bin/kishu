@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-puts "dhdhdhdhdh"
-puts __FILE__
 require File.expand_path("../../lib/kishu", __FILE__)
 
 Kishu::CLI.start
