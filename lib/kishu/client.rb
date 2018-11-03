@@ -24,7 +24,6 @@ module Kishu
         },
         index: "resolutions"
         )
-      puts x.class
       x.dig("aggregations","doi","buckets")
     end
 
@@ -33,7 +32,7 @@ module Kishu
         doi: {composite: {
           sources: [{doi: {terms: {field: :doi	}}}],
           after: { doi: options[:after_key] || "" },
-          size: options[:aggs_size] || 102
+          size: options[:aggs_size]
           },
           aggs: {
             unique: {terms: {field: "unique_usage"}},
