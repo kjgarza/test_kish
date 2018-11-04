@@ -1,5 +1,13 @@
 module Kishu
   module Utils
-  # Your code goes here...
+
+    
+
+
+    def clean_tmp
+      system("rm tmp/datasets-*.json")
+      puts "/tmp Files deleted"
+    end
+
   end
 end
