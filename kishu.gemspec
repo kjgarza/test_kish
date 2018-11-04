@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
 
   # spec.add_dependency 'maremma', '>= 4.1', '< 5'
-  spec.add_dependency 'faraday'
+  spec.add_dependency 'faraday', "~>0.15.3"
   spec.add_dependency 'builder', '~> 3.2', '>= 3.2.2'
   spec.add_dependency 'dotenv', '~> 2.1', '>= 2.1.1'
   spec.add_dependency 'thor', '~> 0.19'
@@ -35,7 +35,11 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "elasticsearch"
   spec.add_development_dependency "thor", '~> 0.19'
-  spec.add_development_dependency "faraday"
+  spec.add_development_dependency "faraday", "~>0.15.3"
+  spec.add_development_dependency 'rack-test', '~> 0'
+  spec.add_development_dependency 'vcr', '~> 3.0', '>= 3.0.3'
+  spec.add_development_dependency 'webmock', '~> 3.0', '>= 3.0.1'
+  spec.add_development_dependency 'simplecov', '~> 0.14.1'
 
   spec.files         = `git ls-files`.split($/)
   spec.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
