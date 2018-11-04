@@ -1,8 +1,8 @@
-# Kishu
+# CLI Generator of DOI Resolution Reports from an ElasticSearch Index
 
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/kishu`. To experiment with that code, run `bin/console` for an interactive prompt.
 
-TODO: Delete this and the text above, and describe your gem
+![kishu](https://c1.staticflickr.com/8/7196/6947533965_2ae463d1c6_b.jpg)
 
 ## Installation
 
