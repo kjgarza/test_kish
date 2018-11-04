@@ -13,8 +13,9 @@ module Kishu
 
 
     def get options={}
+
       x =@client.search(body:{
-          size: options[:size] || 0,
+          size: options[:size] ||= 0,
           query: {
             query_string: {
               query: "*"
@@ -24,14 +25,28 @@ module Kishu
         },
         index: "resolutions"
         )
-      x.dig("aggregations","doi","buckets")
+      x
+    end
+
+    def get_logdate options={}
+      @client.search(body:{
+          size: 1,
+          query: {
+            query_string: {
+              query: "*"
+            }
+          },
+          aggregations: aggregations(options)
+        },
+        index: "resolutions"
+        ).dig("hits","hits",0,"_source","logdate")
     end
 
     def aggregations options={}
       {
         doi: {composite: {
           sources: [{doi: {terms: {field: :doi	}}}],
-          after: { doi: options[:after_key] || "" },
+          after: { doi: options.fetch(:after_key,"")},
           size: options[:aggs_size]
           },
           aggs: {
