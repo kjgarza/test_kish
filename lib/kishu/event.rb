@@ -8,52 +8,18 @@ module Kishu
   module Event 
 
     API_URL = "https://api.datacite.org"
-
-    # def all options={}
-    #   __elasticsearch__ = Elasticsearch::Client.new host: 'localhost:9200', transport_options: { request: { timeout: 3600, open_timeout: 3600 } }
-    #   x =__elasticsearch__.search(body:{
-    #       size: options[:size] || 0,
-    #       query: {
-    #         query_string: {
-    #           query: "*"
-    #         }
-    #       },
-    #       aggregations: aggregations(options)
-    #     },
-    #     index: "resolutions"
-    #     )
-    #   puts x.class
-    #   x.dig("aggregations","doi","buckets")
-    # end
-    
-    # def aggregations options={}
-    #   {
-    #     doi: {composite: {
-    #       sources: [{doi: {terms: {field: :doi	}}}],
-    #       size: options[:aggs_size] || 102
-    #       },
-    #       aggs: {
-    #         unique: {terms: {field: "unique_usage"}},
-    #         totale: {terms: {field: "total_usage"	}}
-    #       }
-    #     }
-    #   }
-    # end
-    
-    
     
     def wrap_event(event)
-      puts "dmdmdmdmdmmdmdmdmdmd \n"
-      # puts event
-      totale = event.dig("totale").fetch("buckets", nil)
+      puts "------------------ \n"
+      totale = event.dig("totale").fetch("buckets", [])
       # puts event.dig("unique").fetch("buckets", nil)
-      unique = event.dig("unique").fetch("buckets", nil)
+      unique = event.dig("unique").fetch("buckets", [])
       # puts unique[1].dig('key')
     
-      unique_regular = unique.find_all {|access_method| access_method.dig('key').match('regular') }
-      unique_machine = unique.find_all {|access_method| access_method.dig('key').match('machine') }
-      total_regular  = totale.find_all {|access_method| access_method.dig('key').match('regular') }
-      total_machine  = totale.find_all {|access_method| access_method.dig('key').match('machine') }
+      unique_regular = unique.find_all {|access_method| access_method.fetch('key',"").match('regular') }
+      unique_machine = unique.find_all {|access_method| access_method.fetch('key',"").match('machine') }
+      total_regular  = totale.find_all {|access_method| access_method.fetch('key',"").match('regular') }
+      total_machine  = totale.find_all {|access_method| access_method.fetch('key',"").match('machine') }
 
       dataset = { 
         doi: event.dig("key","doi"), 
@@ -63,24 +29,6 @@ module Kishu
         total_counts_machine: total_machine.empty? ? 0:  total_machine.dig(0,"doc_count")
       }
 
-
-
-      # dois = totale.map do |dataset| 
-    
-      #   unique_regular = dataset["access_method"]["buckets"].find {|access_method| access_method['key'] == 'regular' }
-      #   unique_machine = dataset["access_method"]["buckets"].find {|access_method| access_method['key'] == 'machine' }
-      #   total_regular  = unique.find {|access_method| access_method['key'] =~ 'regular' }
-      #   total_machine  = dataset["total"]["buckets"].find {|access_method| access_method['key'] == 'machine' }
-    
-      #   puts dataset["key"]
-      #   { 
-      #     doi: dataset["key"], 
-      #     unique_counts_regular: unique_regular.nil? ? 0 : unique_regular["unqiue"]["value"],
-      #     unique_counts_machine: unique_machine.nil? ? 0 : unique_machine["unqiue"]["value"],
-      #     total_counts_regular: total_regular.nil? ? 0 : total_regular["doc_count"],
-      #     total_counts_machine: total_machine.nil? ? 0:  total_machine["doc_count"]
-      #   }
-      # end
     
       conn = Faraday.new(:url => API_URL)
       logger = Logger.new(STDOUT)
@@ -143,12 +91,6 @@ module Kishu
             instance: instances
           }]
         }
-      # end
-    
-      # arr.map! do |instance|
-      #   LogStash::Event.new(instance)
-      # end
-     
     
       instanced
     end
