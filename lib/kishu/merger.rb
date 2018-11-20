@@ -52,17 +52,15 @@ module Kishu
 
     def resolution_logs_folder
       bucket = if ENV['S3_RESOLUTION_LOGS_BUCKET'] ? ENV['S3_RESOLUTION_LOGS_BUCKET'] : "./"
+      end
       "#{bucket}#{@folder}"
     end
 
     def merged_logs_folder
-      bucket = if ENV['S3_MERGED_LOGS_BUCKET'] ? ENV['S3_MERGED_LOGS_BUCKET'] : "./"
+      bucket = if ENV['S3_MERGED_LOGS_BUCKET'] ? ENV['S3_MERGED_LOGS_BUCKET'] : "./monthly_logs"
+      end
       "#{bucket}#{@folder}"
     end
-
-    # def file_steam
-    #   file
-    # end
 
     def merge_files
       File.delete(merged_file) if File.exist?(merged_file)
@@ -76,7 +74,7 @@ module Kishu
 
       system("sort -k3 #{merged_file} > #{sorted_file}")
       puts "Sorted Completed"
-      true
+      puts sorted_file
     end
   end
 end

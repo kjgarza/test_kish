@@ -2,6 +2,7 @@ require 'thor'
 
 
 require_relative 'sushi'
+require_relative 'log'
 
 
 module Kishu
@@ -9,6 +10,7 @@ module Kishu
     include Kishu::Base
     include Kishu::Utils
     include Kishu::Report
+    include Kishu::Merger
     include Kishu::Event
 
     # load ENV variables from .env file if it exists
@@ -29,11 +31,11 @@ module Kishu
     def __print_version
       puts Kishu::VERSION
     end
-
-    # desc "event SUBCOMMAND", "event commands"
-    # subcommand "event", Kishu::Event
-
+    
     desc "sushi SUBCOMMAND", "sushi commands"
     subcommand "sushi", Kishu::Sushi
+
+    desc "log SUBCOMMAND", "log commands"
+    subcommand "log", Kishu::Log
   end
 end
