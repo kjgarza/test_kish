@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["kgarza@datacite.org"]
 
   spec.summary       = "elasticsearhc resolution"
-  spec.description   = "elasticsearhc resolution"
+  spec.description   = "elasticsearhc resolution2"
   spec.homepage      = "https://github.com/datacite/shiba-inu"
   spec.license       = "MIT"
 
@@ -30,6 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'builder', '~> 3.2', '>= 3.2.2'
   spec.add_dependency 'dotenv', '~> 2.1', '>= 2.1.1'
   spec.add_dependency 'thor', '~> 0.19'
+  spec.add_dependency 'maremma', '>= 4.1', '< 5'
   spec.add_development_dependency "bundler", "~> 1.16"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
