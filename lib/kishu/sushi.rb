@@ -21,7 +21,14 @@ module Kishu
    method_option :month_year, :type => :string, :default => "2018-04"
 
    def get
-    get_report options
+    Report.new(options).get_report
+    # get_report options
+
+
+
+
+
+
     #  if doi == "all"
     #    response = get_dois(options)
     #  else

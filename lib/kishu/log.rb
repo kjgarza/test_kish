@@ -19,6 +19,7 @@ module Kishu
 
    def create
       return "Logs don't exist" unless File.directory?(options[:month_year])
+      return "Pipeline has events" unless Pipeline.new.is_empty?
       @log_date = get_date options[:month_year]
       @folder   = options[:month_year]  
       puts @log_date
