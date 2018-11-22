@@ -1,11 +1,12 @@
 require 'faraday'
 require 'logger'
+require 'maremma'
 
 require_relative 'utils'
 require_relative 'base'
 
 module Kishu
-  module Event 
+  class UsageEvent 
 
     API_URL = "https://api.datacite.org"
     
@@ -30,18 +31,27 @@ module Kishu
       }
 
     
-      conn = Faraday.new(:url => API_URL)
+      # conn = Faraday.new(:url => API_URL)
       logger = Logger.new(STDOUT)
       logger.info event.fetch("doc_count")
       
       # arr = dois.map do |dataset| 
         logger.info dataset
         doi = dataset.fetch(:doi,nil)
-        json = conn.get "/works/#{doi}"
-        return {} unless json.success?
-        logger.info "Success on getting metadata for #{doi}"
-        data = JSON.parse(json.body)
-    
+        # json = conn.get "/works/#{doi}"
+        # json = conn.get do |req|
+        #   req.url "/works/#{doi}"
+        #   req.options.timeout = 50           # open/read timeout in seconds
+        #   req.options.open_timeout = 20      # connection open timeout in seconds
+        # end
+        # json = Maremma.get "#{API_URL}/works/#{doi}"
+        # logger.info json.status
+
+        # return {} unless json.status == 200 
+        # logger.info "Success on getting metadata for #{doi}"
+        # data = JSON.parse(json.body)
+        # data = json.body
+        data = {}
         instances =[
           {
             count: dataset.fetch(:total_counts_regular),
@@ -66,11 +76,11 @@ module Kishu
         ]
     
         instances.delete_if {|instance| instance.dig(:count) <= 0}
-        attributes = data.dig("data","attributes")
-        resource_type = attributes.fetch("resource-type-id",nil).nil? ? "dataset" : attributes.fetch("resource-type-id","dataset")
+        attributes = {} #data.dig("data","attributes")
+        resource_type = "" #attributes.fetch("resource-type-id",nil).nil? ? "dataset" : attributes.fetch("resource-type-id",nil)
 
         instanced = { 
-          "dataset-id" => [{type: "doi", value: attributes.fetch("doi",nil)}],
+          "dataset-id" => [{type: "doi", value: dataset.fetch(:doi,nil)}],
           "data-type" => resource_type,
           yop: attributes.fetch("published",nil),
           uri: attributes.fetch("identifier",nil),
@@ -91,7 +101,8 @@ module Kishu
             instance: instances
           }]
         }
-    
+        logger.info instanced
+
       instanced
     end
     
