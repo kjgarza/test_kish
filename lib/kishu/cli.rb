@@ -9,9 +9,9 @@ module Kishu
   class CLI < Thor
     include Kishu::Base
     include Kishu::Utils
-    include Kishu::Report
+    # include Kishu::Report
     include Kishu::Merger
-    include Kishu::Event
+    # include Kishu::Event
 
     # load ENV variables from .env file if it exists
     env_file = File.expand_path("../../.env", __FILE__)
