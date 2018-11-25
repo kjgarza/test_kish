@@ -8,6 +8,7 @@ require "kishu/cursor"
 require "kishu/client"
 require "kishu/log"
 require "kishu/pipeline"
+require "kishu/eventdata_job"
 
 
 
