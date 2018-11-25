@@ -9,6 +9,7 @@ module Kishu
 
     def initialize
       @client = Elasticsearch::Client.new host: 'localhost:9200', transport_options: { request: { timeout: 3600, open_timeout: 3600 } }
+      @client
     end
 
 
@@ -27,6 +28,17 @@ module Kishu
         )
       x
     end
+
+    def is_empty?
+      return true unless get
+      nil
+    end
+
+    def clear_index
+      @client.indices.delete index: 'resolutions'
+      puts "Resolutions index has been deleted"
+    end
+
 
     def get_logdate options={}
       @client.search(body:{
