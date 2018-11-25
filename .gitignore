@@ -9,3 +9,28 @@
 
 # rspec failure tracking
 .rspec_status
+201804/DataCite-access.log-201804-sps4
+201804/datacite_resolution_logs_2018-04-01.log
+201804/datacite_resolution_logs_2018-04-01_sorted.log
+201808/DataCite-access.log-201808-ap-southeast-1
+201808/DataCite-access.log-201808-eu-west-1
+201808/DataCite-access.log-201808-sa-east-1
+201808/DataCite-access.log-201808-us-east-1
+201808/DataCite-access.log-201808-us-west-2
+201808/datacite_resolution_logs_2018-08-01.log
+201808/datacite_resolution_logs_2018-08-01_sorted.log
+201809/DataCite-access.log-201809-ap-southeast-1
+201809/DataCite-access.log-201809-eu-west-1
+201809/DataCite-access.log-201809-us-east-1
+201809/DataCite-access.log-201809-us-west-2
+201809/datacite_resolution_logs_2018-09-01.log
+201809/datacite_resolution_logs_2018-09-01_sorted.log
+201810/DataCite-access.log-201810-ap-southeast-1
+201810/DataCite-access.log-201810-eu-west-1
+201810/DataCite-access.log-201810-us-east-1
+201810/DataCite-access.log-201810-us-west-2
+201810/datacite_resolution_logs_2018-10-01.log
+201810/datacite_resolution_logs_2018-10-01_sorted.log
+reports/datacite_resolution_report_2018-04.json
+reports/datacite_resolution_report_2018-08.json
+reports/datacite_resolution_report_2018-08_2.json
