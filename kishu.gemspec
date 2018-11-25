@@ -41,6 +41,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'vcr', '~> 3.0', '>= 3.0.3'
   spec.add_development_dependency 'webmock', '~> 3.0', '>= 3.0.1'
   spec.add_development_dependency 'simplecov', '~> 0.14.1'
+  spec.add_dependency 'sucker_punch', '~> 2.0'
 
   spec.files         = `git ls-files`.split($/)
   spec.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
