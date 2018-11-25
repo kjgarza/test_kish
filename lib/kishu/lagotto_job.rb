@@ -1,4 +1,4 @@
-class EventdataJob
+class LagottoJob
   include SuckerPunch::Job
   workers 4 
   max_jobs 10
