@@ -2,7 +2,7 @@
 require 'thor'
 
 
-require_relative 'event'
+require_relative 'resolution_event'
 require_relative 'report'
 require_relative 'utils'
 require_relative 'base'
@@ -11,37 +11,47 @@ module Kishu
   class Sushi < Thor
 
   include Kishu::Base
-  include Kishu::Report
+  # include Kishu::Report
   include Kishu::Utils
-  include Kishu::Event
+  # include Kishu::ResolutionEvent
 
    desc "get sushi", "get resolution report"
   #  method_option :username, :default => ENV['MDS_USERNAME']
    method_option :aggs_size, :type => :numeric, :default => 1000
    method_option :month_year, :type => :string, :default => "2018-04"
-
    def get
-    Report.new(options).get_report
-    # get_report options
-
-
-
-
-
-
-    #  if doi == "all"
-    #    response = get_dois(options)
-    #  else
-    #    response = get_doi(doi, options)
-    #  end
-
-    #  if response.body["errors"]
-    #    puts "Error: " + response.body["errors"].first.fetch("title", "An error occured")
-    #  elsif doi == "all"
-    #    puts response.body["data"][0...options[:limit]]
-    #  else
-    #    puts response.body["data"]
-    #  end
+    x =Report.new()
+    x.make_report(options)
+    
    end
+
+   method_option :month_year, :type => :string, :default => "2018-04"
+   method_option :after_key, :type => :string, :default => "10.21236/ada401446"
+   def continue_report
+    x =Report.new()
+    x.generate_files(options)
+    
+   end
+
+   desc "clean_all sushi", "clean index"
+   method_option :month_year, :type => :string, :default => "2018-04"
+   method_option :after_key, :type => :string, :default => "10.21236/ada401446"
+   def clean_all
+    x =Client.new()
+    x.clear_index
+    
+   end
+
+
+   desc "send_report_events sushi", "send_report_events index"
+   method_option :month_year, :type => :string, :default => "2018-04"
+   method_option :after_key, :type => :string, :default => "10.21236/ada401446"
+   def send_report_events
+    x =Report.new()
+    x.send_report_events
+    
+   end
+
+   
   end
 end
