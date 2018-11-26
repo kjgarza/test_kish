@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.16"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "elasticsearch"
+  spec.add_development_dependency 'elasticsearch', '~> 6.1.0'
   spec.add_development_dependency "thor", '~> 0.19'
   spec.add_development_dependency "faraday", "~>0.15.3"
   spec.add_development_dependency 'rack-test', '~> 0'
@@ -43,6 +43,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov', '~> 0.14.1'
   spec.add_dependency 'sucker_punch', '~> 2.0'
   spec.add_dependency 'bolognese', '~> 0.9', '>= 0.10'
+  spec.add_dependency 'elasticsearch', '~> 6.1.0'
 
   spec.files         = `git ls-files`.split($/)
   spec.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

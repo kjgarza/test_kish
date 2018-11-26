@@ -8,7 +8,7 @@ module Kishu
   class Client 
 
     def initialize
-      @client = Elasticsearch::Client.new host: 'localhost:9200', transport_options: { request: { timeout: 3600, open_timeout: 3600 } }
+      @client = Elasticsearch::Client.new host: 'elasticsearch:9200', transport_options: { request: { timeout: 3600, open_timeout: 3600 } }
       @client
     end
 
