@@ -1,18 +1,27 @@
 require 'faraday'
 require 'logger'
 require 'maremma'
+require 'sucker_punch'
 
 require_relative 'utils'
 require_relative 'base'
+require_relative 'lagotto_job'
 
 module Kishu
   class ResolutionEvent 
 
+    include Kishu::Utils
+
+    # include Kishu::EventDataJob
+
+
     API_URL = "https://api.datacite.org"
 
-    def initialise event
+    def initialize(event, options={})
       @event = event
       @logger = Logger.new(STDOUT)
+      @period = options[:period]
+      @report_id = "https://api.datacite.org/reports/0cb326d1-e3e7-4cc1-9d86-7c5f3d5ca310"
       # @conn = Faraday.new(:url => API_URL)
     end
     
@@ -43,7 +52,7 @@ module Kishu
       
       # arr = dois.map do |dataset| 
         logger.info dataset
-        doi = dataset.fetch(:doi,nil)
+        @doi = dataset.fetch(:doi,nil)
         # json = conn.get "/works/#{doi}"
         # json = conn.get do |req|
         #   req.url "/works/#{doi}"
@@ -112,35 +121,27 @@ module Kishu
       instanced
     end
     
-    
-    def get_authors author
-      if (author.key?("given") && author.key?("family"))
-        { type: "name",
-          value: author.fetch("given",nil)+" "+author.fetch("family",nil) }
-        elsif author.key?("literal")
-          { type: "name",
-            value: author.fetch("literal",nil) }
-        else 
-          { type: "name",
-            value: "" }
+  
+
+    def push_event
+      performance = wrap_event
+      # puts performance.dig(:performance,0).class
+      options = {dataset_id:@doi, report_id:@report_id}
+      performance.dig(:performance,0,:instance).map do |instance|
+        LagottoJob.perform_async(instance, options)  
       end
     end
 
-    def get_metadata
-        # json = conn.get "/works/#{doi}"
-        json = @conn.get do |req|
-          req.url "/works/#{doi}"
-          req.options.timeout = 50           # open/read timeout in seconds
-          req.options.open_timeout = 200      # connection open timeout in seconds
-        end
-        # json = Maremma.get "#{API_URL}/works/#{doi}"
-        logger.info json.status
+    # def self.push_instance instance, options={}
+    #   data = format_intance instance, options
+    #   ENV['LAGOTTINO_URL'] = "https://api.test.datacite.org"
+    #   ENV['LAGOTTINO_TOKEN'] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXRhY2l0ZSJ9.u9el_FpmfaQq6REwi2ULhNGAfVE_0xjGMZEttcq8rlw"
 
-        return {} unless json.status == 200 
-        logger.info "Success on getting metadata for #{doi}"
-        data = JSON.parse(json.body)
-        data = json.body
-    end
-  
+    #   push_url = ENV['LAGOTTINO_URL']  + "/events"
+    #   Maremma.post(push_url, data: data.to_json,
+    #                 bearer: ENV['LAGOTTINO_TOKEN'],
+    #                 content_type: 'application/vnd.api+json')
+    # end
+
   end
 end

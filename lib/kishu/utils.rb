@@ -1,7 +1,11 @@
+require "bolognese"
+require "time"
+
 module Kishu
   module Utils
-
+    include ::Bolognese::MetadataUtils
     
+    LICENSE = "https://creativecommons.org/publicdomain/zero/1.0/"
 
 
     def clean_tmp
@@ -43,8 +47,33 @@ module Kishu
       end
     end
 
-    def get_metadata doi
-      # doi = doi_from_url(id)
+    def format_instance  data, options={}
+      obj = get_metadata(options[:dataset_id])
+      subj = {id:options[:report_id]}
+      # subj = "https://api.datacite.org/reports/0cb326d1-e3e7-4cc1-9d86-7c5f3d5ca310"
+      relation_type = "#{data[:"metric-type"]}-#{data[:"access-method"]}"
+      source_id = "datacite-resolution"
+      source_token = "65903a54-01c8-4a3f-9bf2-04ecc658247a"
+      { 
+        "data" => {
+          "type" => "events",
+          "attributes" => {
+            "message-action" => "create",
+            "subj-id" => options[:report_id],
+            "total" => data[:count],
+            "obj-id" => options[:dataset_id],
+            "relation-type-id" => relation_type.to_s.dasherize,
+            "source-id" => source_id,
+            "source-token" => source_token,
+            "occurred-at" => Time.now.iso8601, # need modify
+            "timestamp" => Time.now.iso8601,
+            "license" => LICENSE,
+            "subj" => subj,
+            "obj" => obj } }}
+    end
+
+    def get_metadata id
+      doi = doi_from_url(id)
       return {} unless doi.present?
 
       ENV['API_URL'] = "https://api.datacite.org/"
@@ -58,7 +87,7 @@ module Kishu
   
       resource_type = response.body.dig("data", "relationships")
       resource_type_general = relationships.dig("resource-type", "data", "id")
-      # type = Bolognese::Utils::CR_TO_SO_TRANSLATIONS[resource_type.to_s.underscore.camelcase] || Bolognese::Utils::DC_TO_SO_TRANSLATIONS[resource_type_general.to_s.underscore.camelcase(first_letter = :upper)] || "CreativeWork"
+      type = Bolognese::Utils::CR_TO_SO_TRANSLATIONS[resource_type.to_s.underscore.camelcase] || Bolognese::Utils::DC_TO_SO_TRANSLATIONS[resource_type_general.to_s.underscore.camelcase(first_letter = :upper)] || "CreativeWork"
       author = Array.wrap(attributes["author"]).map do |a| 
         {
           "given_name" => a["givenName"],
@@ -69,7 +98,7 @@ module Kishu
   
       {
         "id" => id,
-        "type" => resource_type_general.underscore.dasherize,
+        "type" => type.underscore.dasherize,
         "name" => attributes["title"],
         "author" => author,
         "publisher" => attributes["publisher"],
