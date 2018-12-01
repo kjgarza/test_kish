@@ -12,6 +12,7 @@ module Kishu
   include Kishu::Merger
   include Kishu::Utils
 
+
    desc "create logs", "create logs"
    method_option :logs_bucket,   :default => ENV['S3_RESOLUTION_LOGS_BUCKET']
    method_option :output_bucket, :default => ENV['S3_MERGED_LOGS_BUCKET']
