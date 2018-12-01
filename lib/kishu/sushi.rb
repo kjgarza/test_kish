@@ -11,9 +11,8 @@ module Kishu
   class Sushi < Thor
 
   include Kishu::Base
-  # include Kishu::Report
   include Kishu::Utils
-  # include Kishu::ResolutionEvent
+
 
    desc "get sushi", "get resolution report"
   #  method_option :username, :default => ENV['MDS_USERNAME']
@@ -48,7 +47,7 @@ module Kishu
    method_option :after_key, :type => :string, :default => "10.21236/ada401446"
    def send_report_events
     x =Report.new()
-    x.push_report_resolutions
+    x.make_report(options)
     
    end
 
