@@ -7,6 +7,7 @@ require_relative 'log'
 
 module Kishu
   class CLI < Thor
+
     include Kishu::Base
     include Kishu::Utils
     # include Kishu::Report

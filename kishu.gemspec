@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dotenv', '~> 2.1', '>= 2.1.1'
   spec.add_dependency 'thor', '~> 0.19'
   spec.add_dependency 'maremma', '>= 4.1', '< 5'
+  spec.add_dependency 'faraday_middleware-aws-sigv4', '~> 0.2.4'
   spec.add_development_dependency "bundler", "~> 1.16"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
