@@ -51,14 +51,12 @@ module Kishu
     end
 
     def resolution_logs_folder
-      bucket = if ENV['S3_RESOLUTION_LOGS_BUCKET'] ? ENV['S3_RESOLUTION_LOGS_BUCKET'] : "./"
-      end
+      bucket = S3_RESOLUTION_LOGS_BUCKET
       "#{bucket}#{@folder}"
     end
 
     def merged_logs_folder
-      bucket = if ENV['S3_MERGED_LOGS_BUCKET'] ? ENV['S3_MERGED_LOGS_BUCKET'] : "./monthly_logs"
-      end
+      bucket = S3_MERGED_LOGS_BUCKET
       "#{bucket}#{@folder}"
     end
 
