@@ -15,8 +15,6 @@ module Kishu
     # include Kishu::EventDataJob
 
 
-    API_URL = "https://api.datacite.org"
-
     def initialize(event, options={})
       @event = event
       @logger = Logger.new(STDOUT)
@@ -26,7 +24,7 @@ module Kishu
     end
     
     def wrap_event
-      puts "------------------ \n"
+      # puts "------------------ \n"
       totale = @event.dig("totale").fetch("buckets", [])
       # puts @event.dig("unique").fetch("buckets", nil)
       unique = @event.dig("unique").fetch("buckets", [])
@@ -47,11 +45,11 @@ module Kishu
 
     
       # conn = Faraday.new(:url => API_URL)
-      logger = Logger.new(STDOUT)
-      logger.info @event.fetch("doc_count")
+      # logger = Logger.new(STDOUT)
+      # logger.info @event.fetch("doc_count")
       
       # arr = dois.map do |dataset| 
-        logger.info dataset
+        # logger.info dataset
         @doi = dataset.fetch(:doi,nil)
         # json = conn.get "/works/#{doi}"
         # json = conn.get do |req|
@@ -116,31 +114,20 @@ module Kishu
             instance: instances
           }]
         }
-        logger.info instanced
+        # logger.info instanced
 
       instanced
     end
     
   
 
-    def push_event
-      performance = wrap_event
-      # puts performance.dig(:performance,0).class
-      options = {dataset_id:@doi, report_id:@report_id}
-      performance.dig(:performance,0,:instance).map do |instance|
-        LagottoJob.perform_async(instance, options)  
-      end
-    end
-
-    # def self.push_instance instance, options={}
-    #   data = format_intance instance, options
-    #   ENV['LAGOTTINO_URL'] = "https://api.test.datacite.org"
-    #   ENV['LAGOTTINO_TOKEN'] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXRhY2l0ZSJ9.u9el_FpmfaQq6REwi2ULhNGAfVE_0xjGMZEttcq8rlw"
-
-    #   push_url = ENV['LAGOTTINO_URL']  + "/events"
-    #   Maremma.post(push_url, data: data.to_json,
-    #                 bearer: ENV['LAGOTTINO_TOKEN'],
-    #                 content_type: 'application/vnd.api+json')
+    # def push_event
+    #   performance = wrap_event
+    #   # puts performance.dig(:performance,0).class
+    #   options = {dataset_id:@doi, report_id:@report_id}
+    #   performance.dig(:performance,0,:instance).map do |instance|
+    #     LagottoJob.perform_async(instance, options)  
+    #   end
     # end
 
   end
