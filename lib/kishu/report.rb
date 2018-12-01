@@ -4,9 +4,11 @@ require "faraday"
 require 'securerandom'
 require 'zlib'
 require 'digest'
+# require 'sucker_punch'
 
 require_relative 'resolution_event'
 require_relative 'client'
+# require_relative 'lagotto_job'
 
 module Kishu
   class Report
@@ -16,7 +18,7 @@ module Kishu
 
     def initialize options={}
       set_period 
-      generate_header_footer
+      # generate_header_footer
       @es_client = Client.new()
       @logger = Logger.new(STDOUT)
       @report_id = options[:report_id] ? options[:report_id] : ""
@@ -37,7 +39,7 @@ module Kishu
       response = es_client.get({aggs_size: options[:aggs_size] || 500, after_key: options[:after_key] ||=""})
       aggs = response.dig("aggregations","doi","buckets")
       x = aggs.map do |agg|
-        ResolutionEvent.new(agg,@period).wrap_event 
+        ResolutionEvent.new(agg,{period: @period, report_id: @report_id}).wrap_event 
       end
       after = response.dig("aggregations","doi").fetch("after_key",{"doi"=>nil}).dig("doi")
       logger.info "After_key for pagination #{after}"
@@ -45,19 +47,19 @@ module Kishu
       y
     end
 
-    def push_events options={}
-      logger = Logger.new(STDOUT)
-      es_client = Client.new()
-      response = es_client.get({aggs_size: options[:aggs_size] || 500, after_key: options[:after_key] ||=""})
-      aggs = response.dig("aggregations","doi","buckets")
-      x = aggs.map do |agg|
-        ResolutionEvent.new(agg,{period: @period, report_id: @report_id}).push_event 
-      end
-      after = response.dig("aggregations","doi").fetch("after_key",{"doi"=>nil}).dig("doi")
-      logger.info "After_key for pagination #{after}"
-      y = {data: x, after: after}
-      y
-    end
+    # def push_events options={}
+    #   logger = Logger.new(STDOUT)
+    #   es_client = Client.new()
+    #   response = es_client.get({aggs_size: options[:aggs_size] || 500, after_key: options[:after_key] ||=""})
+    #   aggs = response.dig("aggregations","doi","buckets")
+    #   x = aggs.map do |agg|
+    #     ResolutionEvent.new(agg,{period: @period, report_id: @report_id}).push_event 
+    #   end
+    #   after = response.dig("aggregations","doi").fetch("after_key",{"doi"=>nil}).dig("doi")
+    #   logger.info "After_key for pagination #{after}"
+    #   y = {data: x, after: after}
+    #   y
+    # end
 
     def generate_dataset_array
       @datasets = []
@@ -65,80 +67,95 @@ module Kishu
         response = get_events({after_key: @after ||=""})
         @datasets = @datasets.concat response[:data]
         @after = response[:after]
+        generate_chunk_report if @datasets.size >= 50000
         break if @after.nil?
       end
     end
 
-    def transverse_dataset_array
-      loop do
-        response = push_events({after_key: @after ||=""})
-        @after = response[:after]
-        break if @after.nil?
-      end
+    # def transverse_dataset_array
+    #   loop do
+    #     response = push_events({after_key: @after ||=""})
+    #     @after = response[:after]
+    #     break if @after.nil?
+    #   end
+    # end
+
+
+    # def generate_files
+    #   loop do
+    #     response = get_events({after_key: @after ||=""})
+    #     File.open("tmp/datasets-#{SecureRandom.hex}.json","w") do |f|
+    #       response[:data].each do |instance|
+    #         separator = response[:after].nil? ? "" : ","
+    #         f.write(instance.to_json+separator+"\n")
+    #       end
+    #     end
+    #     @after = response[:after]
+    #     break if @after.nil?
+    #   end
+    # end
+
+    # def merge_report    
+    #   generate_files
+    #   system("cat tmp/datasets-* > #{merged_file}")
+    #   report = File.read(merged_file)
+    #   parsed = JSON.parse(report)
+    #   File.open(merged_file,"w") do |f|
+    #     f.write(parsed.to_json)
+    #   end
+    #   puts "Merged Completed"
+    # end
+
+    # def compress_merged_file
+    #   report = File.read(merged_file)
+    #   gzip = Zlib::GzipWriter.new(StringIO.new)
+    #   string = JSON.parse(report).to_json
+    #   gzip << string
+    #   body = gzip.close.string
+    #   body
+    # end
+
+    def compress report
+      # report = File.read(hash)
+      gzip = Zlib::GzipWriter.new(StringIO.new)
+      string = report.to_json
+      gzip << string
+      body = gzip.close.string
+      body
     end
 
-
-    def generate_files
-      loop do
-        response = get_events({after_key: @after ||=""})
-        File.open("tmp/datasets-#{SecureRandom.hex}.json","w") do |f|
-          response[:data].each do |instance|
-            separator = response[:after].nil? ? "" : ","
-            f.write(instance.to_json+separator+"\n")
-          end
-        end
-        @after = response[:after]
-        break if @after.nil?
-      end
-    end
-
-    def merge_report    
-      generate_files
-      system("cat tmp/datasets-* > #{merged_file}")
-      report = File.read(merged_file)
-      parsed = JSON.parse(report)
-      File.open(merged_file,"w") do |f|
-        f.write(parsed.to_json)
-      end
-      puts "Merged Completed"
-    end
-
-    def compress_merged_file
-        report = File.read(merged_file)
-        gzip = Zlib::GzipWriter.new(StringIO.new)
-        # gzip << report.delete!("\n").to_json
-        gzip << report.to_json
-        body = gzip.close.string
-        body    
-    end
-
-    def encoded
-      Base64.strict_encode64(compress_merged_file)
-    end
-
-    def checksum
-      Digest::SHA256.hexdigest(compress_merged_file)
-    end
+    # def make_report_from_files
+    #   merge_report
+    #   report_compressed
+    # end
 
 
-    def make_report_from_files
-      merge_report
-      report_compressed
+    def generate_chunk_report
+      # puts get_template
+      send_report get_template
+      # LagottoJob.perform_async(get_template(@datasets))
+      # file = merged_file #+ 'after_key_' + @after
+      # File.open(file,"w") do |f|
+      #   f.write(JSON.pretty_generate get_template)
+      # end
+      @datasets = []
     end
 
     def make_report options={}
       generate_dataset_array
-      get_template
-      File.open(merged_file,"w") do |f|
-        f.write(get_template.to_json)
-      end
+      @logger.info "finished"
+
+      # get_template
+      # File.open(merged_file,"w") do |f|
+      #   f.write(get_template.to_json)
+      # end
     end
 
-    def push_report_resolutions
-      fail "You need a report id" if @report_id.nil?
-      transverse_dataset_array
+    # def push_report_resolutions
+    #   fail "You need a report id" if @report_id.nil?
+    #   transverse_dataset_array
 
-    end
+    # end
 
     def set_period 
       report_period
@@ -148,34 +165,60 @@ module Kishu
       }
     end
 
-    def send_report report_id, options={}
-#      clean_tmp 
+    def send_report report, options={}
+      uri = HUB_URL+'/reports'   
+      puts uri
 
-      # conn = Faraday.new(:url => API_URL)
-      # logger = Logger.new(STDOUT)
-      # logger.info 
-      # compresssed = compress("../../tmp/DataCite-access.log-_#{logdate}.json")
-      # conn.post do |req|
-      #   req.url '/reports'
-      #   req.headers['Content-Type'] = 'json'
-      #   req.headers['encoding'] = 'gzip'
-      #   req.body = compresssed
-      # end
-
-    end
-
-    def report_compressed 
-      report = 
-      {
-        "report-header": get_header,
-        gzip: encoded,
-        checksum: checksum
+      headers = {
+        content_type: "application/gzip",
+        content_encoding: 'gzip',
+        accept: 'gzip'
       }
+      
+      body = compress(report)
+    
+      request = Maremma.post(uri, data: body,
+        bearer: ENV['HUB_TOKEN'],
+        headers: headers,
+        timeout: 100)
 
-      File.open(encoded_file,"w") do |f|
-        f.write(report.to_json)
-      end
+        uid = request.body.dig("data","report","id")
+
+        @logger.info "Hub response #{request.status} for Report finishing in #{@after}"
+        @logger.info "Hub response #{uid} for Report finishing in #{@after}"
+
+
+      fail "wrong response" if  request.status != 201
+      request.status
     end
+
+    # def report_compressed 
+    #   report = 
+    #   {
+    #     "report-header": get_header,
+    #     gzip: encoded,
+    #     checksum: checksum
+    #   }
+
+    #   File.open(encoded_file,"w") do |f|
+    #     f.write(report.to_json)
+    #   end
+    # end
+
+
+    # def get_new_template
+    #   {
+    #     "report-header": get_header,
+    #     "report-datasets": 
+    #   }
+    # end
+
+    # def subset_template 
+    #   {
+    #   "gzip": encoded,
+    #   "sha256": checksum
+    #   }
+    # end
 
     def get_template 
       {
