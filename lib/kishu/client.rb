@@ -1,4 +1,5 @@
-require 'faraday'
+require 'faraday_middleware'
+require 'faraday_middleware/aws_sigv4'
 require 'logger'
 
 require_relative 'utils'
@@ -8,7 +9,22 @@ module Kishu
   class Client 
 
     def initialize
-      @client = Elasticsearch::Client.new host: 'elasticsearch:9200', transport_options: { request: { timeout: 3600, open_timeout: 3600 } }
+      # @client = Elasticsearch::Client.new host: ES_HOST, transport_options: { request: { timeout: 3600, open_timeout: 3600 } }
+      # @client
+      if ES_HOST == "localhost:9200" || ES_HOST == "elasticsearch:9200"
+        @client = Elasticsearch::Client.new(host: ES_HOST, user: "elastic", password: ELASTIC_PASSWORD, transport_options: { request: { timeout: 3600, open_timeout: 3600 }}) do |f|
+          f.adapter Faraday.default_adapter
+        end
+      else
+          @client = Elasticsearch::Client.new(host: ES_HOST, port: '80', scheme: 'http') do |f|
+            f.request :aws_sigv4,
+              service: 'es',
+              region: AWS_REGION,
+              access_key_id: AWS_ACCESS_KEY_ID,
+              secret_access_key: AWS_SECRET_ACCESS_KEY
+            f.adapter Faraday.default_adapter
+          end
+      end
       @client
     end
 
@@ -24,7 +40,7 @@ module Kishu
           },
           aggregations: aggregations(options)
         },
-        index: "resolutions"
+        index: ES_INDEX
         )
       x
     end
@@ -35,7 +51,7 @@ module Kishu
     end
 
     def clear_index
-      @client.indices.delete index: 'resolutions'
+      @client.indices.delete index: ES_INDEX
       puts "Resolutions index has been deleted"
     end
 
