@@ -8,15 +8,15 @@ class LagottoJob
 
 
 
-  def perform(event, options={})
-    data = format_instance event, options
-    ENV['LAGOTTINO_URL'] = "https://api.test.datacite.org"
+  def perform(report, options={})
+    # data = format_instance event, options
 
-    push_url = ENV['LAGOTTINO_URL']  + "/events"
-    response =  Maremma.post(push_url, data: data.to_json,
-                  bearer: token,
-                  content_type: 'application/vnd.api+json')
-    puts data
-    puts response.status
+    # push_url = LAGOTTINO_URL  + "/events"
+    # response =  Maremma.post(push_url, data: data.to_json,
+    #               bearer: LAGOTTINO_TOKEN,
+    #               content_type: 'application/vnd.api+json')
+    # puts data
+    # puts response.status
+    Report.send_report report
   end
 end
