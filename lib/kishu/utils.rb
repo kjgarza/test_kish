@@ -5,9 +5,6 @@ module Kishu
   module Utils
     include ::Bolognese::MetadataUtils
     
-    LICENSE = "https://creativecommons.org/publicdomain/zero/1.0/"
-
-
     def clean_tmp
       system("rm tmp/datasets-*.json")
       puts "/tmp Files deleted"
@@ -53,7 +50,7 @@ module Kishu
       # subj = "https://api.datacite.org/reports/0cb326d1-e3e7-4cc1-9d86-7c5f3d5ca310"
       relation_type = "#{data[:"metric-type"]}-#{data[:"access-method"]}"
       source_id = "datacite-resolution"
-      source_token = "65903a54-01c8-4a3f-9bf2-04ecc658247a"
+      source_token = SOURCE_TOKEN
       { 
         "data" => {
           "type" => "events",
@@ -76,9 +73,7 @@ module Kishu
       doi = doi_from_url(id)
       return {} unless doi.present?
 
-      ENV['API_URL'] = "https://api.datacite.org/"
-
-      url = ENV['API_URL'] + "/dois/#{doi}"
+      url = API_URL + "/dois/#{doi}"
       response = Maremma.get(url)
       return {} if response.status != 200
       
@@ -108,6 +103,13 @@ module Kishu
         "registrant_id" => "datacite.#{client_id}" }.compact
     end
 
+    def encoded
+      Base64.strict_encode64(compress_merged_file)
+    end
+
+    def checksum
+      Digest::SHA256.hexdigest(compress_merged_file)
+    end
 
   end
 end
