@@ -40,7 +40,7 @@ module Kishu
         unique_counts_regular: unique_regular.empty? ? 0 : unique_regular.size,
         unique_counts_machine: unique_machine.empty? ? 0 : unique_machine.size,
         total_counts_regular: total_regular.empty? ? 0 : total_regular.dig(0,"doc_count"),
-        total_counts_machine: total_machine.empty? ? 0:  total_machine.dig(0,"doc_count")
+        total_counts_machine: total_machine.empty? ? 0 :  total_machine.dig(0,"doc_count")
       }
 
     
@@ -67,33 +67,33 @@ module Kishu
         data = {}
         instances =[
           {
-            count: dataset.fetch(:total_counts_regular),
-            "access-method": "regular",
-            "metric-type": "total-resolutions"
+            "count" => dataset.fetch(:total_counts_regular),
+            "access-method" => "regular",
+            "metric-type" => "total-resolutions"
           },
           {
-            count: dataset.fetch(:unique_counts_regular),
-            "access-method": "regular",
-            "metric-type": "unique-resolutions"
+            "count" => dataset.fetch(:unique_counts_regular),
+            "access-method" => "regular",
+            "metric-type" => "unique-resolutions"
           },
           {
-            count: dataset.fetch(:unique_counts_machine),
-            "access-method": "machine",
-            "metric-type": "unique-resolutions"
+            "count" => dataset.fetch(:unique_counts_machine),
+            "access-method" => "machine",
+            "metric-type" => "unique-resolutions"
           },
           {
-            count: dataset.fetch(:total_counts_machine),
-            "access-method": "machine",
-            "metric-type": "total-resolutions"
+            "count" => dataset.fetch(:total_counts_machine),
+            "access-method" => "machine",
+            "metric-type" => "total-resolutions"
           },
         ]
     
-        instances.delete_if {|instance| instance.dig(:count) <= 0}
+        instances.delete_if {|instance| instance.dig("count") < 1}
         attributes = {} #data.dig("data","attributes")
         resource_type = "" #attributes.fetch("resource-type-id",nil).nil? ? "dataset" : attributes.fetch("resource-type-id",nil)
 
         instanced = { 
-          "dataset-id" => [{type: "doi", value: dataset.fetch(:doi,nil)}],
+          "dataset-id" => [{"type" => "doi", "value"=> dataset.fetch(:doi,nil)}],
           # "data-type" => resource_type,
           # yop: attributes.fetch("published",nil),
           # uri: attributes.fetch("identifier",nil),
@@ -109,9 +109,9 @@ module Kishu
           # }],
           # "dataset-contributors": attributes.fetch("author",[]).map { |a| get_authors(a) },
           # platform: "datacite",
-          performance: [{
-            period: @period,
-            instance: instances
+          "performance" => [{
+            "period"=> @period,
+            "instance"=> instances
           }]
         }
         # logger.info instanced
