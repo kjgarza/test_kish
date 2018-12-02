@@ -22,6 +22,7 @@ module Kishu
       @es_client = Client.new()
       @logger = Logger.new(STDOUT)
       @report_id = options[:report_id] ? options[:report_id] : ""
+      @total = 0
     end
 
     def report_period options={}
@@ -39,7 +40,7 @@ module Kishu
       response = es_client.get({aggs_size: options[:aggs_size] || 500, after_key: options[:after_key] ||=""})
       aggs = response.dig("aggregations","doi","buckets")
       x = aggs.map do |agg|
-        ResolutionEvent.new(agg,{period: @period, report_id: @report_id}).wrap_event 
+        ResolutionEvent.new(agg,{period: @period, report_id: @report_id}).wrap_event
       end
       after = response.dig("aggregations","doi").fetch("after_key",{"doi"=>nil}).dig("doi")
       logger.info "After_key for pagination #{after}"
@@ -67,7 +68,8 @@ module Kishu
         response = get_events({after_key: @after ||=""})
         @datasets = @datasets.concat response[:data]
         @after = response[:after]
-        generate_chunk_report if @datasets.size >= 50000
+        @total += @datasets.size
+        generate_chunk_report if @datasets.size > 45000
         break if @after.nil?
       end
     end
@@ -132,30 +134,20 @@ module Kishu
 
     def generate_chunk_report
       # puts get_template
-      send_report get_template
       # LagottoJob.perform_async(get_template(@datasets))
-      # file = merged_file #+ 'after_key_' + @after
-      # File.open(file,"w") do |f|
-      #   f.write(JSON.pretty_generate get_template)
-      # end
+      file = merged_file #+ 'after_key_' + @after
+      File.open(file,"w") do |f|
+        f.write(JSON.pretty_generate get_template)
+      end
+      send_report get_template
       @datasets = []
     end
 
     def make_report options={}
       generate_dataset_array
-      @logger.info "finished"
-
-      # get_template
-      # File.open(merged_file,"w") do |f|
-      #   f.write(get_template.to_json)
-      # end
+      @logger.info  "#{LOGS_TAG} Month of #{@period.dig("begin-date")} sent to Hub in report #{@uid} with stats for #{@total} datasets"
     end
 
-    # def push_report_resolutions
-    #   fail "You need a report id" if @report_id.nil?
-    #   transverse_dataset_array
-
-    # end
 
     def set_period 
       report_period
@@ -176,19 +168,20 @@ module Kishu
       }
       
       body = compress(report)
-    
-      request = Maremma.post(uri, data: body,
-        bearer: ENV['HUB_TOKEN'],
-        headers: headers,
-        timeout: 100)
-
-        uid = request.body.dig("data","report","id")
-
-        @logger.info "Hub response #{request.status} for Report finishing in #{@after}"
-        @logger.info "Hub response #{uid} for Report finishing in #{@after}"
-
-
-      fail "wrong response" if  request.status != 201
+      n = 0
+      loop do
+        request = Maremma.post(uri, data: body,
+          bearer: ENV['HUB_TOKEN'],
+          headers: headers,
+          timeout: 100)
+        @uid = request.body.dig("data","report","id")
+        @logger.info "#{LOGS_TAG} Hub response #{request.status} for Report finishing in #{@after}"
+        @logger.info "#{LOGS_TAG} Hub response #{uid} for Report finishing in #{@after}"
+        n += 1
+        break if request == 201
+        fail "#{LOGS_TAG} Too many attempts were tried to push this report" if n > 1
+        sleep 1
+      end
       request.status
     end
 
