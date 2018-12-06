@@ -9,8 +9,7 @@ module Kishu
   class Client 
 
     def initialize
-      # @client = Elasticsearch::Client.new host: ES_HOST, transport_options: { request: { timeout: 3600, open_timeout: 3600 } }
-      # @client
+
       if ES_HOST == "localhost:9200" || ES_HOST == "elasticsearch:9200"
         @client = Elasticsearch::Client.new(host: ES_HOST, user: "elastic", password: ELASTIC_PASSWORD, transport_options: { request: { timeout: 3600, open_timeout: 3600 }}) do |f|
           f.adapter Faraday.default_adapter

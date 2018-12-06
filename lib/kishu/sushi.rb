@@ -45,8 +45,10 @@ module Kishu
    desc "send_report_events sushi", "send_report_events index"
    method_option :month_year, :type => :string, :default => "2018-04"
    method_option :after_key, :type => :string, :default => "10.21236/ada401446"
+   method_option :chunk_size, :type => :numeric, :default => 40000
+   method_option :aggs_size, :type => :numeric, :default => 500
    def send_report_events
-    x =Report.new()
+    x =Report.new(options)
     x.make_report(options)
     
    end
