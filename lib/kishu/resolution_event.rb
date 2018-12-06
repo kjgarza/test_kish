@@ -12,15 +12,10 @@ module Kishu
 
     include Kishu::Utils
 
-    # include Kishu::EventDataJob
-
-
     def initialize(event, options={})
       @event = event
       @logger = Logger.new(STDOUT)
       @period = options[:period]
-      @report_id = "https://api.datacite.org/reports/0cb326d1-e3e7-4cc1-9d86-7c5f3d5ca310"
-      # @conn = Faraday.new(:url => API_URL)
     end
     
     def wrap_event
@@ -44,26 +39,8 @@ module Kishu
       }
 
     
-      # conn = Faraday.new(:url => API_URL)
-      # logger = Logger.new(STDOUT)
-      # logger.info @event.fetch("doc_count")
-      
-      # arr = dois.map do |dataset| 
-        # logger.info dataset
         @doi = dataset.fetch(:doi,nil)
-        # json = conn.get "/works/#{doi}"
-        # json = conn.get do |req|
-        #   req.url "/works/#{doi}"
-        #   req.options.timeout = 50           # open/read timeout in seconds
-        #   req.options.open_timeout = 20      # connection open timeout in seconds
-        # end
-        # json = Maremma.get "#{API_URL}/works/#{doi}"
-        # logger.info json.status
 
-        # return {} unless json.status == 200 
-        # logger.info "Success on getting metadata for #{doi}"
-        # data = JSON.parse(json.body)
-        # data = json.body
         data = {}
         instances =[
           {
@@ -89,46 +66,18 @@ module Kishu
         ]
     
         instances.delete_if {|instance| instance.dig("count") < 1}
-        attributes = {} #data.dig("data","attributes")
-        resource_type = "" #attributes.fetch("resource-type-id",nil).nil? ? "dataset" : attributes.fetch("resource-type-id",nil)
+  
 
         instanced = { 
           "dataset-id" => [{"type" => "doi", "value"=> dataset.fetch(:doi,nil)}],
-          # "data-type" => resource_type,
-          # yop: attributes.fetch("published",nil),
-          # uri: attributes.fetch("identifier",nil),
-          # publisher: attributes.fetch("container-title",nil),
-          # "dataset-title": attributes.fetch("title",nil),
-          # "publisher-id": [{
-          #   type: "client-id",
-          #   value: attributes.fetch("data-center-id",nil)
-          # }],
-          # "dataset-dates": [{
-          #   type: "pub-date",
-          #   value: attributes.fetch("published",nil)
-          # }],
-          # "dataset-contributors": attributes.fetch("author",[]).map { |a| get_authors(a) },
-          # platform: "datacite",
           "performance" => [{
             "period"=> @period,
             "instance"=> instances
           }]
         }
-        # logger.info instanced
-
       instanced
     end
     
   
-
-    # def push_event
-    #   performance = wrap_event
-    #   # puts performance.dig(:performance,0).class
-    #   options = {dataset_id:@doi, report_id:@report_id}
-    #   performance.dig(:performance,0,:instance).map do |instance|
-    #     LagottoJob.perform_async(instance, options)  
-    #   end
-    # end
-
   end
 end
