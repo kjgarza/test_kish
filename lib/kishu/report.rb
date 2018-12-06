@@ -22,6 +22,7 @@ module Kishu
       @total = 0
       @aggs_size = options[:aggs_size] 
       @chunk_size = options[:chunk_size]
+      @after = options[:after_key] ||=""
     end
 
     def report_period options={}
