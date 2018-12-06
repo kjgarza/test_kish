@@ -12,7 +12,7 @@ require "kishu/lagotto_job"
 
 API_URL         = ENV['API_URL'] ? ENV['API_URL'] : "https://api.datacite.org"
 HUB_URL         = ENV['HUB_URL'] ? ENV['HUB_URL'] : "https://api.test.datacite.org"
-HUB_TOKEN       = ENV['HUB_TOKEN'] ? ENV['HUB_TOKEN'] : "eyJhbGciOiJSUzI1NiJ9.eyJ1aWQiOiIwMDAwLTAwMDEtNTQ4OS0zNTk0IiwibmFtZSI6Ikpvc2lhaCBDYXJiZXJyeSIsInByb3ZpZGVyX2lkIjoiZGF0YWNpdGUiLCJjbGllbnRfaWQiOiJkYXRhY2l0ZS5kYXRhY2l0ZSIsInJvbGVfaWQiOiJzdGFmZl9hZG1pbiIsImlhdCI6MTUyMTExMDY1MSwiZXhwIjoxMTExMTExMTExMTExMTExMTExMjEyMTIxMjEyMTIxMjEyMTIxMzY0MjMyMjc3Mn0.Uwgd-e17YcSI6mWOWiSez6JjQs-DTw9yXx1elLo0yXiuFPRtCw3EoiVchUYsJTkNEfxNpoQo8ktKWSwNOD1rHCwjaYjhCQ-7cq6dCEBPaFxMzUPiwOXvQjBxdz-Vj9FmcpkkK1TqQvjP7iICUxLONuBhSKnD6zzb-ds3Z6dOl_68ZhDUxbIUvfLgcTfu_nTAY0E7TuMotxBiCSx5fkBo89lV4nNO5MhdjeTs0eWf_5QOXsmrTcNgwy6I0wmqi-Nxm9zLI9wpMV1EFW-2ZOZhxP2VazAWhilDKYTrHBd4tsgbjN7Fc8GQEgfsjZCMwLaR6QSnFJjWDzRq296LQVxz8g"
+HUB_TOKEN       = ENV['HUB_TOKEN'] ? ENV['HUB_TOKEN'] : ""
 ES_HOST         = ENV['ES_HOST'] ? ENV['ES_HOST'] : "localhost:9200"
 ES_INDEX        = ENV['ES_INDEX'] ? ENV['ES_INDEX'] : "resolutions"
 LOGSTASH_HOST   = ENV['LOGSTASH_HOST'] ? ENV['LOGSTASH_HOST'] : "localhost:9600"
