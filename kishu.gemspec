@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Kristian Garza"]
   spec.email         = ["kgarza@datacite.org"]
 
-  spec.summary       = "elasticsearhc resolution"
-  spec.description   = "elasticsearhc resolution2"
-  spec.homepage      = "https://github.com/datacite/shiba-inu"
+  spec.summary       = "Client for DOI Resolution Logs processing pipeline"
+  spec.description   = "This client helps you to prepare logs to be consumed for the pipeline as well as for creating DOI resolution reports using the COUNTER CoP "
+  spec.homepage      = "https://github.com/datacite/kishu"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
@@ -42,6 +42,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'vcr', '~> 3.0', '>= 3.0.3'
   spec.add_development_dependency 'webmock', '~> 3.0', '>= 3.0.1'
   spec.add_development_dependency 'simplecov', '~> 0.14.1'
+  spec.add_development_dependency 'factory_bot', '~> 4.0'
   spec.add_dependency 'sucker_punch', '~> 2.0'
   spec.add_dependency 'bolognese', '~> 0.9', '>= 0.10'
   spec.add_dependency 'elasticsearch', '~> 6.1.0'
