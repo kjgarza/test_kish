@@ -11,7 +11,7 @@ module Kishu
     def initialize
 
       if ES_HOST == "localhost:9200" || ES_HOST == "elasticsearch:9200"
-        @client = Elasticsearch::Client.new(host: ES_HOST, user: "elastic", password: ELASTIC_PASSWORD, transport_options: { request: { timeout: 3600, open_timeout: 3600 }}) do |f|
+        @client = Elasticsearch::Client.new(host: ES_HOST, user: "elastic", password: ELASTIC_PASSWORD, transport_options: { request: { timeout: 3600}}) do |f|
           f.adapter Faraday.default_adapter
         end
       else
@@ -62,8 +62,7 @@ module Kishu
             query_string: {
               query: "*"
             }
-          },
-          aggregations: aggregations(options)
+          }
         },
         index: "resolutions"
         ).dig("hits","hits",0,"_source","logdate")
