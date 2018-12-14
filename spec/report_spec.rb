@@ -3,33 +3,7 @@ require 'spec_helper'
 
 describe Kishu::Report, vcr: true, :order => :defined do
   let(:report) {Kishu::Report.new()}
-  describe "report_period" do
-    context "when doi doesn't exist" do
-
-      it "should fail" do
-        # response = subject.get_events
-        # expect(response).to be({})
-      end
-    end
-  end
-
-
-  describe "get_events" do
-    context "" do
-      it "should return the data for one message" do
-  
-      end
-    end
-  end
-
-  describe "generate_dataset_array" do
-    context "" do
-      it "" do
-  
-      end
-    end
-  end
-
+ 
   describe "compress" do
     context "when json arrives compresses it correctly" do
       
@@ -39,27 +13,67 @@ describe Kishu::Report, vcr: true, :order => :defined do
     end
   end
 
-
-  describe "generate_chunk_report" do
-    context "" do
-      it "" do
-  
+  describe "get_template" do
+    context "when Godd Usage report" do
+      let(:usage_params) {{encoding:"json",schema:"usage",enrich:true,created_by:"DataOne"}}
+      let(:datasets) {fixture_file("usage_datasest_array.json")}
+      let(:period) {{}}
+      it "generate a good template" do
+        response = Report.new(usage_params)
+        response.datasets = datasets
+        expect(response.get_template.dig("report-header","release")).to eq("rd1")
+        expect(response.get_template.dig("report-header","created_by")).to eq("DataOne")
+        expect(response.get_template.dig("report-datasets").size).to eq(10)
       end
     end
-  end
 
-  describe "set_period" do
-    context "" do
-      it "" do
-  
+    context "when Godd Resolution report" do
+      let(:resolution_params) {{encoding:"json",schema:"resolution",enrich:false,created_by:"Dash"}}
+      let(:datasets) {fixture_file("usage_datasest_array.json")}
+      let(:period) {{}}
+      it "generate a good template" do
+        response = Report.new(resolution_params)
+        response.datasets = datasets
+        expect(response.get_template.dig("report-header","release")).to eq("dlr")
+        expect(response.get_template.dig("report-header","created_by")).to eq("Dash")
+        expect(response.get_template.dig("report-datasets").size).to eq(10)
+      end
+    end
+    context "when Bad Resolution report" do
+      let(:resolution_params) {{encoding:"json",schema:"resolution",enrich:false,created_by:"Dash"}}
+      let(:datasets) {fixture_file("usage_datasest_array.json")}
+      let(:period) {{}}
+      it "generate a good template" do
+        response = Report.new(resolution_params)
+        response.datasets = datasets
+        expect(response.get_template.dig("report-header","release")).to eq("dlr")
+        expect(response.get_template.dig("report-header","created_by")).to eq("Dash")
+        expect(response.get_template.dig("report-datasets").size).to eq(10)
       end
     end
   end
 
   describe "send_report" do
-    context "when the report is good" do
-      it "" do
-  
+    context "when Godd Usage report" do
+      let(:usage_params) {{encoding:"json",schema:"usage",enrich:true,created_by:"DataOne"}}
+      let(:datasets) {fixture_file("usage_datasest_array.json")}
+      let(:period) {{}}
+      it "return 200" do
+        report = Report.new(usage_params)
+        report.datasets = datasets
+        response = report.send_report
+        expect(response.status).to eq(201)  
+      end
+    end
+    context "when Godd Resolution report" do
+      let(:resolution_params) {{encoding:"json",schema:"resolution",enrich:false,created_by:"datacite"}}
+      let(:datasets) {fixture_file("usage_datasest_array.json")}
+      let(:period) {{}}
+      it "return 200" do
+        report = Report.new(resolution_params)
+        report.datasets = datasets
+        response = report.send_report
+        expect(response.status).to eq(201)  
       end
     end
 
