@@ -13,6 +13,7 @@ module Kishu
 
     include Kishu::Base
     include Kishu::Utils
+    attr_reader :uid, :total, :period
 
     def initialize options={}
       set_period 
@@ -21,8 +22,17 @@ module Kishu
       @report_id = options[:report_id] ? options[:report_id] : ""
       @total = 0
       @aggs_size = options[:aggs_size] 
-      @chunk_size = options[:chunk_size]
       @after = options[:after_key] ||=""
+      @enrich = options[:enrich] 
+      @schema = options[:schema] 
+      @encoding = options[:encoding] 
+      @created_by = options[:created_by] 
+      @report_size = options[:report_size] 
+      if @schema == "resolution" 
+        @enrich = false
+        @encoding = "gzip"
+        # @report_size = 20000
+      end
     end
 
     def report_period options={}
@@ -37,10 +47,13 @@ module Kishu
     def get_events options={}
       logger = Logger.new(STDOUT)
       es_client = Client.new()
-      response = es_client.get({aggs_size: @aggs_size || 500, after_key: options[:after_key] ||=""})
+      response = es_client.get({aggs_size: @aggs_size || 400, after_key: options[:after_key] ||=""})
       aggs = response.dig("aggregations","doi","buckets")
       x = aggs.map do |agg|
-        ResolutionEvent.new(agg,{period: @period, report_id: @report_id}).wrap_event
+        case @schema
+          when "resolution" then ResolutionEvent.new(agg,{period: @period, report_id: @report_id}).wrap_event
+          when "usage"      then UsageEvent.new(agg,{period: @period, report_id: @report_id}).wrap_event
+        end
       end
       after = response.dig("aggregations","doi").fetch("after_key",{"doi"=>nil}).dig("doi")
       logger.info "After_key for pagination #{after}"
@@ -56,13 +69,24 @@ module Kishu
         @datasets = @datasets.concat response[:data]
         @after = response[:after]
         @total += @datasets.size
-        generate_chunk_report if @datasets.size > @chunk_size
+        generate_chunk_report if @datasets.size > @report_size
+        break if @after.nil?
+      end
+    end
+
+    def generate
+      @datasets = []
+      loop do
+        response = get_events({after_key: @after ||=""})
+        @datasets = @datasets.concat response[:data]
+        @after = response[:after]
+        @total += @datasets.size
+        break if @total > 40000
         break if @after.nil?
       end
     end
 
     def compress report
-      # report = File.read(hash)
       gzip = Zlib::GzipWriter.new(StringIO.new)
       string = report.to_json
       gzip << string
@@ -82,17 +106,12 @@ module Kishu
       @datasets = []
     end
 
-    def make_report options={}
-      generate_dataset_array
-      @logger.info  "#{LOGS_TAG} Month of #{@period.dig("begin-date")} sent to Hub in report #{@uid} with stats for #{@total} datasets"
-    end
-
 
     def set_period 
-      report_period
+      rp = report_period
       @period = { 
-        "begin-date": Date.civil(report_period.year, report_period.mon, 1).strftime("%Y-%m-%d"),
-        "end-date": Date.civil(report_period.year, report_period.mon, -1).strftime("%Y-%m-%d"),
+        "begin-date": Date.civil(rp.year, rp.mon, 1).strftime("%Y-%m-%d"),
+        "end-date": Date.civil(rp.year, rp.mon, -1).strftime("%Y-%m-%d"),
       }
     end
 
@@ -100,19 +119,31 @@ module Kishu
       uri = HUB_URL+'/reports'   
       puts uri
 
-      headers = {
-        content_type: "application/gzip",
-        content_encoding: 'gzip',
-        accept: 'gzip'
-      }
-      
-      body = compress(report)
+      case @encoding 
+        when "gzip" then
+          headers = {
+            content_type: "application/gzip",
+            content_encoding: 'gzip',
+            accept: 'gzip'
+          }
+          body = compress(report)
+        when "json" then
+          headers = {
+            content_type: "application/json",
+            accept: 'application/json'
+          }
+          body = report
+      end
+
       n = 0
       loop do
         request = Maremma.post(uri, data: body,
           bearer: ENV['HUB_TOKEN'],
           headers: headers,
           timeout: 100)
+
+        puts body
+        puts headers
 
         @uid = request.body.dig("data","report","id")
         @logger.info "#{LOGS_TAG} Hub response #{request.status} for Report finishing in #{@after}"
@@ -132,12 +163,16 @@ module Kishu
     end
 
     def get_header 
+      report_type = case @schema
+        when "resolution" then {release:"drl", title:"resolution report"}
+        when "usage"      then {release:"rd1", title:"usage report"}
+      end 
       {
-        "report-name": "resolution report",
+        "report-name": report_type.dig(:title),
         "report-id": "dsr",
-        release: "drl",
+        release: report_type.dig(:release),
         created: Date.today.strftime("%Y-%m-%d"),
-        "created-by": "datacite",
+        "created-by": @created_by,
         "reporting-period": @period,
         "report-filters": [],
         "report-attributes": [],

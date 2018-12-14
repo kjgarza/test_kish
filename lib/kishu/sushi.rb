@@ -14,24 +14,6 @@ module Kishu
   include Kishu::Utils
 
 
-   desc "get sushi", "get resolution report"
-  #  method_option :username, :default => ENV['MDS_USERNAME']
-   method_option :aggs_size, :type => :numeric, :default => 1000
-   method_option :month_year, :type => :string, :default => "2018-04"
-   def get
-    x =Report.new()
-    x.make_report(options)
-    
-   end
-
-   method_option :month_year, :type => :string, :default => "2018-04"
-   method_option :after_key, :type => :string
-   def continue_report
-    x =Report.new()
-    x.generate_files(options)
-    
-   end
-
    desc "clean_all sushi", "clean index"
    method_option :month_year, :type => :string, :default => "2018-04"
    method_option :after_key, :type => :string
@@ -41,19 +23,55 @@ module Kishu
     
    end
 
-
-   desc "send_report_events sushi", "send_report_events index"
-   method_option :month_year, :type => :string, :default => "2018-04"
-   method_option :after_key, :type => :string
-   method_option :chunk_size, :type => :numeric, :default => 40000
-   method_option :aggs_size, :type => :numeric, :default => 500
-   def send_report_events
+   desc "stream a sushi", "stream report"
+   method_option :month_year,  :type => :string, :default => "2018-04"
+   method_option :after_key,   :type => :string
+   method_option :report_size, :type => :numeric, :default => 40000
+   method_option :aggs_size,   :type => :numeric, :default => 500
+   method_option :schema,      :type => :string, :default => "usage"
+   method_option :enrich,      :type => :boolean, :default => false
+   method_option :encoding,     :type => :string, :default => "gzip"
+   method_option :created_by,  :type => :string, :default => "datacite"
+   def stream
     fail "You need to set your JWT" if HUB_TOKEN.blank?
-    x =Report.new(options)
-    x.make_report(options)
-    
+    report = Report.new(options)
+    report.generate_dataset_array
+    LOGGER.info  "#{LOGS_TAG} Month of #{report.period.dig("begin-date")} sent to Hub in report #{report.uid} with stats for #{report.total} datasets"
    end
 
-   
+   desc "generate a sushi", "generate report"
+   method_option :schema,      :type => :string, :default => "usage"
+   method_option :enrich,      :type => :boolean, :default => true
+   method_option :encoding,     :type => :string, :default => "json"
+   method_option :created_by,  :type => :string, :default => "datacite"
+   def generate
+    report = Report.new(options)
+    report.generate
+    file = report.merged_file
+    File.open(file,"w") do |f|
+      f.write(JSON.pretty_generate report.get_template)
+    end
+    LOGGER.info  "#{LOGS_TAG} Month of #{report.period.dig("begin-date")} with stats for #{report.total} datasets"
+   end
+
+   desc "push a sushi", "push report"
+   method_option :schema,      :type => :string, :default => "usage"
+   method_option :enrich,      :type => :boolean, :default => true
+   method_option :encoding,     :type => :string, :default => "json"
+   method_option :created_by,  :type => :string, :default => "datacite"
+   def push
+    fail "You need to set your JWT" if HUB_TOKEN.blank?
+    report = Report.new(options)
+    report.generate
+    report.send_report report.get_template
+    LOGGER.info  "#{LOGS_TAG} Month of #{report.period.dig("begin-date")} sent to Hub in report #{report.uid} with stats for #{report.total} datasets"
+   end
+
+   desc "is ES running", "check es is working" 
+   def elasticsearch_results
+    es = Client.get({aggs_size: 10, after_key: ""})
+    puts es
+   end
+
   end
 end
