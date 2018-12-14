@@ -41,7 +41,7 @@ module Kishu
     
         @doi = dataset.fetch(:doi,nil)
 
-        data = {}
+      
         instances =[
           {
             "count" => dataset.fetch(:total_counts_regular),
