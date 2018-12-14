@@ -77,13 +77,13 @@ describe Kishu::Report, vcr: true, :order => :defined do
   #     end
   #   end
 
-    context "when the report is bad" do
-      it "return error" do
-        # status = Report.send_report report
-        # expect(status).not_to eq("201")
-      end
-    end
-  end
+    # context "when the report is bad" do
+    #   it "return error" do
+    #     # status = Report.send_report report
+    #     # expect(status).not_to eq("201")
+    #   end
+    # end
+  # end
 
 end
 
