@@ -1,10 +1,9 @@
----
-sudo: false
 language: ruby
-cache: bundler
 rvm:
-  - 2.3.3
-before_install: gem install bundler -v 1.16.4
+- 2.3.1
+install:
+- travis_retry bundle install
+# script: bundle exec rspec
 notifications:
   slack: "$SLACK_TOKEN"
   email: false
