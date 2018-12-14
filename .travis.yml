@@ -5,3 +5,14 @@ cache: bundler
 rvm:
   - 2.3.3
 before_install: gem install bundler -v 1.16.4
+notifications:
+  slack: "$SLACK_TOKEN"
+  email: false
+deploy:
+  provider: rubygems
+  api_key:
+    secure: "$RUBYGEMS_KEY"
+  gem: kishu
+  on:
+    tags: true
+    repo: datacite/kishu
