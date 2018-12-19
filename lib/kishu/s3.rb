@@ -8,7 +8,10 @@ module Kishu
   class S3 
 
     def initialize
-      s3 = Aws::S3::Client.new
+      s3 = Aws::S3::Client.new(
+        :access_key_id => AWS_ACCESS_KEY_ID,
+        :secret_access_key => AWS_SECRET_ACCESS_KEY
+      )
       resp = s3.list_buckets
       resp.buckets.map(&:name)
     end
