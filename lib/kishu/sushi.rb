@@ -69,8 +69,10 @@ module Kishu
 
    desc "is ES running", "check es is working" 
    def elasticsearch_results
-    es = Client.get({aggs_size: 10, after_key: ""})
-    puts es
+    es = Client.new()
+    es = es.get({aggs_size: 10, after_key: ""})
+    puts es.dig("hits","total")
+    puts "Aggregations:" + es.fetch("aggregations",[]).first.to_s
    end
 
   end
