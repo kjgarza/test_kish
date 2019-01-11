@@ -29,5 +29,10 @@ module Kishu
       merge_files
       sort_files
    end
+
+   desc "is logstahs running", "check logstahs is working" 
+   def pipeline_status
+    puts Pipeline.new.status?
+   end
   end
 end
