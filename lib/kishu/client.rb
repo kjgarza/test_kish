@@ -32,6 +32,7 @@ module Kishu
 
       x =@client.search(body:{
           size: options[:size] ||= 0,
+          track_total_hits: false,
           query: {
             query_string: {
               query: "*"
