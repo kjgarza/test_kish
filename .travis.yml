@@ -10,7 +10,7 @@ notifications:
 deploy:
   provider: rubygems
   api_key:
-    secure: "$RUBYGEMS_KEY"
+    secure: 63b5df1bb3cccc852a8735dac74655b0
   gem: kishu
   on:
     tags: true
