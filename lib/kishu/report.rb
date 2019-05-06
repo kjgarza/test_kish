@@ -142,15 +142,17 @@ module Kishu
           headers: headers,
           timeout: 100)
 
-        puts body
-        puts headers
+        # puts body
+        # puts headers
 
         @uid = request.body.dig("data","report","id")
         @logger.info "#{LOGS_TAG} Hub response #{request.status} for Report finishing in #{@after}"
         @logger.info "#{LOGS_TAG} Hub response #{@uid} for Report finishing in #{@after}"
         n += 1
         break if request.status == 201
-        fail "#{LOGS_TAG} Too many attempts were tried to push this report" if n > 1
+        @logger.info "#{LOGS_TAG} Too many attempts were tried to push this report in #{@after}"
+        # fail "#{LOGS_TAG} Too many attempts were tried to push this report" if n > 1
+        break if n > 1
         sleep 1
       end
     end
