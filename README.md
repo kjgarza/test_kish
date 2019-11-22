@@ -34,23 +34,35 @@ export HUB_URL="https://api.test.datacite.org"
 You can generate a usage report locally with:
 
 ```shell
-kishu sushi generate created_by:{YOUR DATACITE CLIENT ID}
+kishu sushi generate --created_by {YOUR DATACITE CLIENT ID}
 ```
 
 To generate and push a usage report in JSON format following the Code of Practice for Usage Metrics, you can use the following command. 
 
 ```shell
-kishu sushi push created_by:{YOUR DATACITE CLIENT ID}
+kishu sushi push --created_by {YOUR DATACITE CLIENT ID}
 ```
 
 To stream a usage report in JSON format following the Code of Practice for Usage Metrics, you can use the following command. This option should be only used with reports with more than 50,000 datasets or larger than 10MB. We compress all reports that are streammed to the the MDC Hub.
 
 ```shell
-kishu sushi stream created_by:{YOUR DATACITE CLIENT ID}
+kishu sushi stream --created_by {YOUR DATACITE CLIENT ID}
 ```
 
 
 ## Development
+
+To buil:
+
+```
+
+bump patch
+gem build kishu.gemspec
+gem install kishu-0.0.0.gem
+
+
+```
+
 
 We use rspec for unit testing:
 
